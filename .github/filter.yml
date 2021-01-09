@@ -1,0 +1,40 @@
+name: Filter test
+
+# testing the filter feature
+
+on:  workflow_dispatch
+
+env:
+  CHARACTER_LIMIT: "5000"
+  LAST_TIME: "4000h"
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component:
+          - label: unfiltered
+            feed: https://github.com/cygwin/cygwin/releases.atom
+            titleFilter:
+            contentFilter:
+          - label: cygwin
+            feed: https://github.com/cygwin/cygwin/releases.atom
+            titleFilter: newlib
+            contentFilter:
+          - label: newlib
+            feed: https://github.com/cygwin/cygwin/releases.atom
+            titleFilter:
+            contentFilter: ^Cygwin
+      fail-fast: false
+    steps:
+      - uses: rimrul/rss-issues-action@filter
+        with:
+          feed: ${{matrix.component.feed}}
+          prefix: "[New version]"
+          labels: ${{matrix.component.label}}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          characterLimit: ${{ env.CHARACTER_LIMIT }}
+          lastTime: ${{ env.LAST_TIME }}
+          titleFilter: ${{matrix.component.titleFilter}}
+          contentFilter: ${{matrix.component.contentFilter}}
